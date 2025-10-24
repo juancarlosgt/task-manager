@@ -74,4 +74,15 @@ class ColumnController extends Controller
         $column->update($validator->validated());
         return response()->json($column);
     }
+
+    public function destroy($projectId, $id)
+    {
+        $column = Column::find($id);
+        if (!$column) {
+            return response()->json(['message' => 'Column not found'], 404);
+        }
+
+        $column->delete();
+        return response()->json(['message' => 'Column deleted successfully']);
+    }
 }

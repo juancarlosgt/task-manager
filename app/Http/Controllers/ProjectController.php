@@ -22,6 +22,7 @@ class ProjectController extends Controller
         if (!$project) {
             return response()->json(['message' => 'Project not found'], 404);
         }
+        $project->load('columns');
         return response()->json($project);
     }
 
