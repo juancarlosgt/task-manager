@@ -26,5 +26,8 @@ Route::post('projects/{projectId}/columns', [ColumnController::class, 'store']);
 Route::put('projects/{projectId}/columns/{columnId}', [ColumnController::class, 'update']);
 Route::delete('projects/{projectId}/columns/{columnId}', [ColumnController::class, 'destroy']);
 
-Route::apiResource('columns', 'App\Http\Controllers\ColumnController');
-Route::apiResource('tasks', 'App\Http\Controllers\TaskController');
+Route::get('columns/{columnId}/tasks', [TaskController::class, 'index']);
+Route::get('columns/{columnId}/tasks/{taskId}', [TaskController::class, 'show']);
+Route::post('columns/{columnId}/tasks', [TaskController::class, 'store']);
+Route::put('columns/{columnId}/tasks/{taskId}', [TaskController::class, 'update']);
+Route::delete('columns/{columnId}/tasks/{taskId}', [TaskController::class, 'destroy']);
