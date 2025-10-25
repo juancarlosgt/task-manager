@@ -8,7 +8,7 @@ class Project extends Model
 {
     protected $table = 'projects';
 
-    protected $fillable = ['name', 'description'];
+    protected $fillable = ['name', 'description','user_id'];
 
     
 
@@ -18,4 +18,8 @@ class Project extends Model
         return $this->hasMany(Column::class);
     }
 
+    public function users()
+    {
+        return $this->belongsToMany(User::class);
+    }
 }

@@ -6,12 +6,21 @@ use Illuminate\Http\Request;
 use App\Models\Column;
 use App\Models\Project;
 use Illuminate\Support\Facades\Validator;
+use Tymon\JWTAuth\Facades\JWTAuth; 
+use Tymon\JWTAuth\Exceptions\JWTException;
 class ColumnController extends Controller
 {
     
     public function index($projectId)
     {
-        $project = Project::find($projectId);
+
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'Token is invalid or expired'], 401);
+        }
+
+        $project = Project::where('user_id', $user->id)->find($projectId);
         if (!$project) {
             return response()->json(['message' => 'Project not found'], 404);
         }
@@ -26,7 +35,16 @@ class ColumnController extends Controller
 
     public function show($projectId, $id)
     {
-        $column = Column::find($id);
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'Token is invalid or expired'], 401);
+        }
+        $project = Project::where('user_id', $user->id)->find($projectId);
+        if (!$project) {
+            return response()->json(['message' => 'Project not found'], 404);
+        }
+        $column = Column::where('project_id',$projectId)-> find($id);
         if (!$column) {
             return response()->json(['message' => 'Column not found'], 404);
         }
@@ -35,7 +53,13 @@ class ColumnController extends Controller
      
     public function store(Request $request, $projectId)
     {
-        $project = Project::findOrFail($projectId);
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'Token is invalid or expired'], 401);
+        }
+
+        $project = Project::where('user_id',$user->id) ->findOrFail($projectId);
         if (!$project) {
             return response()->json(['message' => 'Project not found'], 404);
         }
@@ -58,7 +82,18 @@ class ColumnController extends Controller
 
     public function update(Request $request,$projectId, $id)
     {
-        $column = Column::find($id);
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'Token is invalid or expired'], 401);
+        }
+
+        $project = Project::where('user_id',$user->id) ->findOrFail($projectId);
+        if (!$project) {
+            return response()->json(['message' => 'Project not found'], 404);
+        }
+
+        $column = Column::where("project_id", $projectId) ->find($id);
         if (!$column) {
             return response()->json(['message' => 'Column not found'], 404);
         }
@@ -77,7 +112,17 @@ class ColumnController extends Controller
 
     public function destroy($projectId, $id)
     {
-        $column = Column::find($id);
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'Token is invalid or expired'], 401);
+        }
+        $project = Project::where('user_id',$user->id) ->findOrFail($projectId);
+        if (!$project) {
+            return response()->json(['message' => 'Project not found'], 404);
+        }
+
+        $column = Column::where("project_id", $projectId) -> find($id);
         if (!$column) {
             return response()->json(['message' => 'Column not found'], 404);
         }

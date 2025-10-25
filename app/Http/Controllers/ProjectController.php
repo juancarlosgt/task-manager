@@ -5,11 +5,20 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Tymon\JWTAuth\Exceptions\JWTException;
+
 class ProjectController extends Controller
 {
     public function index()
     {
-        $projects = Project::all();
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'Token is invalid or expired'], 401);
+        }
+        
+        $projects = Project::where('user_id', $user->id)->with('columns')->get();
         if ($projects->isEmpty()) {
             return response()->json(['message' => 'No projects found'], 404);
         }
@@ -18,11 +27,18 @@ class ProjectController extends Controller
 
     public function show($id)
     {
-        $project = Project::find($id);
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'Token is invalid or expired'], 401);
+        }
+
+        $project = Project::where('user_id', $user->id)->with('columns.tasks')->find($id);
+
         if (!$project) {
             return response()->json(['message' => 'Project not found'], 404);
         }
-        $project->load('columns');
+
         return response()->json($project);
     }
 
@@ -37,7 +53,15 @@ class ProjectController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'Token is invalid or expired'], 401);
+        }
+
         $validatedData = $validator->validated();
+        $validatedData['user_id'] = $user->id;
+
         $project = Project::create($validatedData);
 
         return response()->json($project, 201);
@@ -45,7 +69,13 @@ class ProjectController extends Controller
 
     public function update(Request $request, $id)
     {
-        $project = Project::find($id);
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'Token is invalid or expired'], 401);
+        }
+
+        $project = Project::where('user_id', $user->id)->find($id);
         if (!$project) {
             return response()->json(['message' => 'Project not found'], 404);
         }
@@ -67,7 +97,12 @@ class ProjectController extends Controller
 
     public function destroy($id)
     {
-        $project = Project::find($id);
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'Token is invalid or expired'], 401);
+        }
+        $project = Project::where('user_id', $user->id)->find($id);
         if (!$project) {
             return response()->json(['message' => 'Project not found'], 404);
         }
@@ -75,5 +110,4 @@ class ProjectController extends Controller
         $project->delete();
         return response()->json(['message' => 'Project deleted successfully']);
     }
-    
 }
