@@ -34,8 +34,8 @@ class AuthController extends Controller
         $token = JWTAuth::attempt(['email' => $validated['email'], 'password' => $validated['password']]);
 
         return response()->json([
-            'user'  => $user,
             'token' => $token,
+            'user'  => $user,
         ]);
     }
 
@@ -47,10 +47,17 @@ class AuthController extends Controller
             return response()->json(['error' => 'Credenciales inválidas'], 401);
         }
 
+        $user = JWTAuth::user();
+
         return response()->json([
             'access_token' => $token,
             'token_type'   => 'bearer',
             'expires_in'   => JWTAuth::factory()->getTTL() * 60,
+            'user'         => [
+            'id'    => $user->id,
+            'name'  => $user->name,
+            'email' => $user->email,
+        ]
         ]);
     }
 
